@@ -35,25 +35,65 @@ spring:
     serialization:
       write-dates-as-timestamps: false
     default-property-inclusion: non_null
+    time-zone: UTC
 
-# JWT Configuration
-jwt:
-  secret: mySecretKey123456789012345678901234567890
-  expiration: 86400000 # 24 hours in milliseconds
-
-# AI Service Configuration
-ai:
-  provider: openai # openai, azure, custom
-  openai:
-    api-key: ${OPENAI_API_KEY:your-openai-api-key}
-    model: gpt-3.5-turbo
-    max-tokens: 1000
-    temperature: 0.7
-  azure:
-    endpoint: ${AZURE_OPENAI_ENDPOINT:}
-    api-key: ${AZURE_OPENAI_API_KEY:}
-    deployment-name: ${AZURE_OPENAI_DEPLOYMENT:}
+# Qwen3 AI Configuration
+qwen3:
+  # API Configuration
+  api-url: https://dashscope.aliyuncs.com/api/v1/services/aigc/text-generation/generation
+  api-key: ${QWEN3_API_KEY:your-api-key-here}
   
+  # Model Configuration
+  model-name: qwen-turbo
+  temperature: 0.7
+  max-tokens: 1000
+  analysis-max-tokens: 150
+  
+  # System Prompts
+  system-prompt: |
+    You are an intelligent assistant for a backend management system. 
+    Provide helpful, accurate, and contextual responses based on the system data provided. 
+    Format your responses appropriately for the user interface - use clear, professional language 
+    and structure information logically. When dealing with system data, highlight key information 
+    and provide actionable insights when possible.
+  
+  analysis-system-prompt: |
+    You are an expert at analyzing user messages to determine intent and appropriate response formats. 
+    Analyze the user's message and respond with a JSON object containing: 
+    intent (the user's primary intention), format (best response format: text, card, list, or table), 
+    and confidence (0.0-1.0 confidence score). Focus on system administration, data queries, 
+    and management interface needs.
+  
+  # Request Configuration
+  request-timeout: 30000
+  max-retries: 3
+  max-history-length: 5
+  
+  # Feature Flags
+  enable-caching: true
+  cache-ttl-seconds: 300
+  enable-logging: false
+
+# Logging Configuration
+logging:
+  level:
+    com.chatbot: INFO
+    org.springframework.web: DEBUG
+    org.springframework.security: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+
+# Management and Monitoring
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always
+
 # CORS Configuration
 cors:
   allowed-origins: 
@@ -70,10 +110,7 @@ cors:
     - "*"
   allow-credentials: true
 
-# Logging Configuration
-logging:
-  level:
-    com.chatbot: DEBUG
-    org.springframework.security: DEBUG
-  pattern:
-    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+# JWT Configuration
+jwt:
+  secret: ${JWT_SECRET:mySecretKey}
+  expiration: 86400000 # 24 hours
